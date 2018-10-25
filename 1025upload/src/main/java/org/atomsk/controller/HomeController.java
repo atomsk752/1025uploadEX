@@ -23,6 +23,11 @@ public class HomeController {
 	public void uploadInput() {
 		
 	}
+	
+	@GetMapping("/uploadAjax")
+	public void uploadAjax(){
+		
+	}
 	/**
 	 * Simply selects the home view to render by returning its name.
 	 */
