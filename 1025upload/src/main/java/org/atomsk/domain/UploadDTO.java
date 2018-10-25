@@ -10,5 +10,5 @@ public class UploadDTO {
 	private String uploadName;
 	private String originName;
 	private String thumbName;
-	private boolean img;
+	private String ext;
 }
