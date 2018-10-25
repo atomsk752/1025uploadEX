@@ -14,9 +14,35 @@
 <div class="thumbs">
 
 </div>
+<style>
+.imgBox{
+	width: 100%;
+	height: 100vh;
+	position: absolute;
+	top:0px;
+	left:0px;
+	background-color: gray;
+	display: none;
+}
 
+</style>
+<div class="imgBox">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
+
+$(".thumbs").on("click", "img", function(e){
+
+	var obj = $(this);
+	console.log(obj);
+	$(".imgBox").html("<img src='/viewFile/"+obj.attr("data-src")+"'>").show('slow');
+	
+	
+});
+
+$(".imgBox").on("click", function(e){
+	$(this).hide("slow");
+});
+
 
 $("#btn").on("click", function (e) {
 	var thumbs = $(".thumbs");
@@ -39,13 +65,16 @@ $("#btn").on("click", function (e) {
 		success:function(result){
 			alert(result);
 			console.log(result);
-			var str = ";"
+			var str = "";
 			for (var i = 0; i < result.length; i++) {
 				
 				var path = "/viewFile/"+result[i].thumbName+"_"+result[i].ext;
+				var fileSrc = (result[i].thumbName+"_"+result[i].ext).substring(2)
 				
-				
-				str += "<img src='"+path+"'>";
+				str += "<div>";
+				str += "<img data-src='"+fileSrc+"' src='"+path+"'>";
+				str += "<p>" + result[i].originName+"</p>";
+				str += "</div>";
 				
 				
 			}
