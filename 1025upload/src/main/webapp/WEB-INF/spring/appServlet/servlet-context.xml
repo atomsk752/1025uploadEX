@@ -12,6 +12,20 @@
 	<!-- Enables the Spring MVC @Controller programming model -->
 	<annotation-driven />
 
+	<beans:bean id="sampleInter" class="org.atomsk.interceptor.SampleInterceptor"></beans:bean>
+	<beans:bean id="loginInter" class="org.atomsk.interceptor.AfterLoginInterceptor"></beans:bean>
+	<beans:bean id="checkInter" class="org.atomsk.interceptor.CheckLoginInterceptor"></beans:bean>
+	<interceptors>
+	<interceptor>
+	<mapping path="/uploadAjax"/>
+	<beans:ref bean="checkInter"/>
+	</interceptor>
+	<interceptor>
+	<mapping path="/login"/>
+	<beans:ref bean="loginInter"/>
+	</interceptor>
+	</interceptors>
+
 	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
 	<resources mapping="/resources/**" location="/resources/" />
 
