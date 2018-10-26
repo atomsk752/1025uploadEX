@@ -30,12 +30,20 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 
+$(".thumbs").on("click", "p", function(e){
+
+	var obj = $(this);
+	console.log(obj);
+	var link = "/download/"+obj.attr("data-src");
+	self.location = link;
+	
+});
+
 $(".thumbs").on("click", "img", function(e){
 
 	var obj = $(this);
 	console.log(obj);
 	$(".imgBox").html("<img src='/viewFile/"+obj.attr("data-src")+"'>").show('slow');
-	
 	
 });
 
@@ -63,8 +71,9 @@ $("#btn").on("click", function (e) {
 		data:formData,
 		type:"POST",
 		success:function(result){
-			alert(result);
+			
 			console.log(result);
+			
 			var str = "";
 			for (var i = 0; i < result.length; i++) {
 				
@@ -73,7 +82,7 @@ $("#btn").on("click", function (e) {
 				
 				str += "<div>";
 				str += "<img data-src='"+fileSrc+"' src='"+path+"'>";
-				str += "<p>" + result[i].originName+"</p>";
+				str += "<p data-src='"+fileSrc+"'>" + result[i].originName+"</p>";
 				str += "</div>";
 				
 				

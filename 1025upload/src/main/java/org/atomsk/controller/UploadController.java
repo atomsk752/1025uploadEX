@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.atomsk.domain.UploadDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -24,84 +25,117 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.extern.log4j.Log4j;
 import net.coobird.thumbnailator.Thumbnailator;
 
-
-
 @Controller
 @Log4j
 public class UploadController {
-	
-	@GetMapping("/viewFile/{fileName}") //이러면 파일의 확장자가 안따라오는데 어떻게 해야할까??
+
+	@GetMapping(value="/download/{fileName}", produces= {MediaType.APPLICATION_OCTET_STREAM_VALUE})
 	@ResponseBody
-	public ResponseEntity<byte[]> viewFile(@PathVariable("fileName")String fileName) {
+	public ResponseEntity<byte[]> download(@PathVariable("fileName") String fileName) {
 		log.info("FileName: " + fileName);
+
+		String fName = fileName.substring(0, fileName.lastIndexOf("_"));
+		log.info("Fname: " + fName);
+		String ext = fileName.substring(fileName.lastIndexOf("_") + 1);
+		log.info("Ext: " + ext);
+
+		String total = fName + "." + ext;
+
+		int under = total.indexOf("_");
 		
-		String fName = fileName.substring(0,fileName.lastIndexOf("_"));
-		log.info("Fname: "+fName);
-		String ext = fileName.substring(fileName.lastIndexOf("_")+1);
-		log.info("Ext: "+ ext);
-		
-		String total =fName+"."+ext;
-		log.info(total);
-		
+		String totalOrigin = total.substring(under+1);
+
 		ResponseEntity<byte[]> result = null;
-		
+
 		try {
-			File target = new File("C:\\upload\\"+total);
+			File target = new File("C:\\upload\\" + total);
+			
+			String downName = new String(totalOrigin.getBytes("UTF-8"),"ISO-8859-1");
+			
+			log.info("DOWNLOAD FILE: "+ downName);
+			
 			HttpHeaders header = new HttpHeaders();
-			header.add("Content-type", Files.probeContentType(target.toPath()));
-			
-			
+			header.add("Content-Disposition", "attachment; fileName="+ downName);
+
 			byte[] arr = FileCopyUtils.copyToByteArray(target);
-			result = new ResponseEntity<>(arr, header,HttpStatus.OK);
+			result = new ResponseEntity<>(arr, header, HttpStatus.OK);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
+
 		}
 		return result;
 	}
-	
-	
-	@PostMapping(value="/upload",produces="application/json; charset=utf-8")
+
+
+	@GetMapping("/viewFile/{fileName}") // 이러면 파일의 확장자가 안따라오는데 어떻게 해야할까??
+	@ResponseBody
+	public ResponseEntity<byte[]> viewFile(@PathVariable("fileName") String fileName) {
+		log.info("FileName: " + fileName);
+
+		String fName = fileName.substring(0, fileName.lastIndexOf("_"));
+		log.info("Fname: " + fName);
+		String ext = fileName.substring(fileName.lastIndexOf("_") + 1);
+		log.info("Ext: " + ext);
+
+		String total = fName + "." + ext;
+		log.info(total);
+
+		ResponseEntity<byte[]> result = null;
+
+		try {
+			File target = new File("C:\\upload\\" + total);
+			HttpHeaders header = new HttpHeaders();
+			header.add("Content-type", Files.probeContentType(target.toPath()));
+
+			byte[] arr = FileCopyUtils.copyToByteArray(target);
+			result = new ResponseEntity<>(arr, header, HttpStatus.OK);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+		}
+		return result;
+	}
+
+	@PostMapping(value = "/upload", produces = "application/json; charset=utf-8")
 	@ResponseBody
 	public List<UploadDTO> upload(MultipartFile[] files) {
-		
+
 		List<UploadDTO> result = new ArrayList<>();
-		
+
 		for (MultipartFile file : files) {
-			
+
 			log.info(file.getOriginalFilename());
 			log.info(file.getContentType());
 			log.info(file.getSize());
-			
+
 			UUID uuid = UUID.randomUUID();
-			
-			String saveFileName = uuid.toString()+"_"+file.getOriginalFilename();
-			String thumbFileName = "s_"+saveFileName;
-			
-			File saveFile = new File("C:\\upload\\"+saveFileName);
+
+			String saveFileName = uuid.toString() + "_" + file.getOriginalFilename();
+			String thumbFileName = "s_" + saveFileName;
+
+			File saveFile = new File("C:\\upload\\" + saveFileName);
 			FileOutputStream thumbFile = null;
-			
+
 			try {
 
-				thumbFile = new FileOutputStream("C:\\upload\\"+thumbFileName);
+				thumbFile = new FileOutputStream("C:\\upload\\" + thumbFileName);
 				Thumbnailator.createThumbnail(file.getInputStream(), thumbFile, 100, 100);
-				
+
 				thumbFile.close();
 				file.transferTo(saveFile);
-				
-				result.add(new UploadDTO(
-						saveFileName, 
-						file.getOriginalFilename(), 
-						thumbFileName.substring(0,thumbFileName.lastIndexOf(".")),
-						thumbFileName.substring(thumbFileName.lastIndexOf(".")+1)));
+
+				result.add(new UploadDTO(saveFileName, file.getOriginalFilename(),
+						thumbFileName.substring(0, thumbFileName.lastIndexOf(".")),
+						thumbFileName.substring(thumbFileName.lastIndexOf(".") + 1)));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		return result;
-		
+
 	}
 
 }
